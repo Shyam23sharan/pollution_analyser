@@ -1,0 +1,47 @@
+#include <LiquidCrystal.h>          // LCD library
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;   //Initializing various parameters of LCD
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);      // Function for LCD
+
+int buzzer=8;     //Buzzer is connected to the 8th pin of the Arduino Nano
+int led = 9;    //LED  is connected to the 9th pin of the Arduino Nano
+const int aqi = A0;   ;//Analog voltage is transmitted to the A0 pin of the Arduino Nano  
+int threshold = 400;    //Threshold value for comparison
+
+void setup() {
+  pinMode(buzzer,OUTPUT);   //Setting the 8th pin as output pin 
+  pinMode(led, OUTPUT);   //Setting the 9th pin as output pin 
+  pinMode(aqi, INPUT);    //setting A0 pin as input pin
+
+  Serial.begin(9600);   //baud rate
+  lcd.clear();      //clearing the lcd display
+  lcd.begin(16, 2); //dimensions 16X2
+}
+
+void loop() {
+  int ppm = analogRead(aqi);  //reading the analog signal
+  int actppm= ppm;    //neglecting the fresh air ppm concentration
+  Serial.print("AQI : ");
+  Serial.println(actppm);
+
+  lcd.setCursor(0, 0);  //Origin 
+  lcd.print("AQI: ");
+  lcd.print(actppm);
+  
+
+  if (actppm > threshold) { //comparison
+    lcd.setCursor(0,1);
+    lcd.print("HAZARDOUS       ");
+    tone(led,1000,400); //Blinking the LED
+    digitalWrite(buzzer, HIGH); //Triggering the buzzer
+
+  } 
+  else 
+  {
+    digitalWrite(led, LOW);   //set LED low
+    digitalWrite(buzzer,LOW); //trigger the buzzer
+    lcd.setCursor(0,1);
+    lcd.print("GOOD            ");
+  }
+
+  delay(500);   //delay
+}
